@@ -1,0 +1,33 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+      "standard": {
+        "format": "%(levelname)s | %(asctime)s | %(message)s"
+      },
+      "json": {
+        "format": "%(message)s"
+      }
+    },
+    "handlers": {
+      "stdout": {
+        "class": "logging.StreamHandler",
+        "formatter": "standard",
+        "level": "INFO"
+      },
+      "json_file": {
+        "class": "logging.FileHandler",
+        "formatter": "json",
+        "level": "INFO",
+        "filename": "logs/log.json",
+        "mode": "a"
+      }
+    },
+    "root": {
+      "level": "INFO",
+      "handlers": [
+        "stdout",
+        "json_file"
+      ]
+    }
+}
