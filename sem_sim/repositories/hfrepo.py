@@ -4,7 +4,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sem_sim.configuration.configuration import configuration
 
-
+# Интерфейс эмбеддеров из Hugging Face
 class HFRepo:
     def __init__(self):
         self.model = SentenceTransformer(configuration.project_root / "models" / configuration.model_name)

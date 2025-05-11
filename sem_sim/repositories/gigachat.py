@@ -3,7 +3,7 @@ from typing import List
 from gigachat import GigaChat
 from sem_sim.configuration.configuration import configuration
 
-
+# Интерфейс гигачат эмбеддера
 class GigaChatRepo:
     def __init__(self):
         self.client = GigaChat(

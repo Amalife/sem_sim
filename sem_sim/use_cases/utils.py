@@ -4,6 +4,8 @@ from nltk.util import ngrams
 from sem_sim.configuration.configuration import configuration
 from sem_sim.logger.logger import app_logger
 
+
+# Функция определения индексов каждого слова в предложении
 def make_ids(sent):
     word_indices = []
     length = len(sent)
@@ -23,6 +25,7 @@ def make_ids(sent):
 
     return word_indices
 
+# Функция составление индексов биграм и триграм на основе индексов слов
 def make_ngrams_ids(sent_ids):
     a = [tuple(sent_ids[i:i+2]) for i in range(len(sent_ids) - 1)]
     bigram_ids = [tuple([val[0][0], val[-1][-1]]) for val in a]
@@ -31,6 +34,7 @@ def make_ngrams_ids(sent_ids):
     trigram_ids = [tuple([val[0][0], val[-1][-1]]) for val in a]
     return bigram_ids, trigram_ids
 
+# Функция составления нграм
 def make_ngrams(sent):
     sent_unogram = sent.split()
     bigram = ngrams(sent_unogram, 2)
@@ -40,30 +44,36 @@ def make_ngrams(sent):
 
     return sent_unogram, sent_bigram, sent_trigram
 
+# Функция поиска ближайшего слова к фразе
 def find_words_scores(embeds_ids, phrase_embed, sent):
     all_sims = []
+    # Считаем близость фразы по всем нграмам
     for (embed_list, words_ids) in embeds_ids:
         sims = []
         for embed in embed_list:
             sims.append(np.dot(embed.embedding / np.linalg.norm(embed.embedding), phrase_embed.embedding / np.linalg.norm(phrase_embed.embedding)))
         all_sims.append((sims, words_ids))
     app_logger.info("Got similarity table: %s", all_sims)
+    # Находим блок нграм, где самая высокая оценка близости
     ngram_max_id = np.argmax([np.max(k) for k in [v[0] for v in all_sims]])
     cur_sims = all_sims[ngram_max_id]
+    # Сортируем блок нграм по близости
     sort_sims = sorted(list(zip(cur_sims[0], cur_sims[1])), reverse=True)
     top1 = sort_sims[0]
     results = [top1]
+    # Находим слова внутри окрестности самого близкого слова
     for val in sort_sims[1:]:
         if abs(val[0] - top1[0]) < configuration.sim_epsilon:
             results.append(val)
         else:
             break
     words = []
+    # Добавляем слова в результат, которые попались в окрестность
     for res in results:
         words.append(sent[res[1][0]:res[1][1]])
     return results, words
 
-
+# Функция проверрки, что фраза близко к предложению
 def check_sent_sim(sent_embed, phrase_embed):
     score = np.dot(sent_embed.embedding / np.linalg.norm(sent_embed.embedding), phrase_embed.embedding / np.linalg.norm(phrase_embed.embedding))
     app_logger.info("Got sent scores %s", score)
